@@ -11,84 +11,90 @@ REQUESTS/ ENDPOINTS:
     URL: /movies
     Method: GET
     Query Parameters: none
-    Request format: text
+    Request format: none
     Response format: JSON
 
 2. Return data (description, genre, director, image URL, whether it’s featured or not) about a single movie by title to the user:
-    URL: /movies/:title
+    URL: /movies/:Title
     Method: GET
     Query Parameters: Movie Title (ex: The Dark Knight)
-    Request format: text (ex: /The%20Dark%20Knight)
+    Request format: String/text (ex: /The%20Dark%20Knight)
     Response format: JSON
 
 3. Return data about a genre (description) by name/title:
-    URL: /genres/:name
+    URL: /genres/:genreName
     Method: GET 
     Query Parameters: Genre name (ex: Action)
-    Request format: text (ex: /Action)
+    Request format: String/text (ex: /Action)
     Response format: JSON
 
 4. Return data about a director (bio, birth year, death year) by name:
-    URL: /directors/:name
+    URL: /directors/:directorName
     Method: GET
     Query Parameters: Director name (ex: Christopher Nolan)
-    Request format: text (ex: /Christopher%20Nolan)
+    Request format: String/text (ex: /Christopher%20Nolan)
     Response format: JSON
 
 
 5. Allow new users to register:
     URL: /users
     Method: POST
-    Query Parameters: none
-    Request format: json 
-        (ex:
-        username: johndoe123
-        password: password123
-        email: john123@doe.com)
-    Response format: text
+    Query Parameters: User info (username, password, email, etc)
+    Request format: JSON (ex:
+      {
+        "Username": "johndoe123",
+        "Password": "password123",
+        "Email": "john123@doe.com",
+        "Birthday": "xx/yy/zz"
+      })
+    Response format: JSON
 
-6. Allow users to update their user info (username):
-    URL: /users/:username
+5.1 Get all users:
+    URL: /users
+    Method: GET
+    Query Paramters: none
+    Request format: none
+    Response format: JSON
+
+5.2 Get a user by username:
+    URL: /users/:Username
+    Method: GET
+    Query parameters: Username
+    Request format: String/text (ex: /testuser123)
+    Response format: JSON
+
+6. Allow users to update their user info:
+    URL: /users/:Username
     Method: PUT
-    Query Parameters: username (ex: /johndoe123)
-    Request format: json 
+    Query Parameters: Username (ex: /johndoe123)
+    Request format: JSON
         (ex:
         username: coolguy123)
-    Response format: text
+    Response format: JSON
 
-7. Allow users to add a movie to their list of favorites (showing only a text that a movie has been added):
-    URL: /users/:username/favorites/:movie
+7. Allow users to add a movie to their list of favorites:
+    URL: /users/:Username/favorites/:movieID
     Method: POST
-    Query Parameters: username, movie title (ex: users/johndoe123/favorites/Bullet%Train)
-    Request format: json
-        (ex: 
-        movie title: lorem ipsum
-        year: 1234
-        director: lorem ipsum
-        genre: lorem ipsum
-        )
-    Response format: text
+    Query Parameters: username, movie ID (ex: users/johndoe123/favorites/68781d078e3212faf9718dc8)
+    Request format: JSON (ex:
+      {
+        "Favorites": "68781d078e3212faf9718dc8"
+      })
+    Response format: JSON
 
-8. Allow users to remove a movie from their list of favorites (showing only a text that a movie has been removed):
-    URL: /users/:username/favorites/:movie
+8. Allow users to remove a movie from their list of favorites:
+    URL: /users/:username/favorites/:movieID
     Method: DELETE
-    Query Parameters: username, movie title (ex: users/johndoe123/favorites/bullet%train)
-    Request format: json
-        (ex: 
-        movie title: lorem ipsum
-        year: 1234
-        director: lorem ipsum
-        genre: lorem ipsum
-        )
-    Response format: text
+    Query Parameters: username, movie ID (ex: users/johndoe123/favorites/68781d078e3212faf9718dc8)
+    Request format: JSON (ex:
+      {
+        "Favorites": "68781d078e3212faf9718dc8"
+      })
+    Response format: JSON
 
-9. Allow existing users to deregister (showing only a text that a user email has been removed):
-    URL: /users/:username
+9. Allow existing users to deregister:
+    URL: /users/:Username
     Method: DELETE
-    Query Parameters: username (ex: users/johndoe123)
-    Request format: json
-        (ex:
-        username: johndoe123
-        password: password123
-        email: john123@doe.com)
-    Response format: text
+    Query Parameters: Username
+    Request format: String/text (ex: /johndoe123)
+    Response format: Text

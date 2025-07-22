@@ -1,72 +1,17 @@
-const express = require("express"),
-    morgan = require('morgan');
+const mongoose = require('mongoose');
+const Models = require('./models.js');
 
+const Movies = Models.Movie;
+const Users = Models.User;
+
+mongoose.connect('mongodb://127.0.0.1:27017/myFlixDB');
+
+const express = require("express");
+const morgan = require('morgan');
 const app = express();
 
-let movies = [
-    {
-        title: 'The Dark Knight',
-        year: '2008',
-        genre: 'Action',
-        director: 'Christopher Nolan'
-    },
-    {
-        title: 'Inception',
-        year: '2010',
-        genre: 'Action',
-        director: 'Christopher Nolan'
-
-    },
-    {
-        title: 'The Matrix',
-        year: '1999',
-        genre: 'Science Fiction',
-        director: 'Lana Wachowski'
-    },
-    {
-        title: 'Terminator 2: Judgment Day',
-        year: '1991',
-        genre: 'Action',
-        director: 'James Cameron'
-    },
-    {
-        title: 'Back to the Future',
-        year: '1985',
-        genre: 'Comedy',
-        director: 'Robert Zemeckis'
-    },
-    {
-        title: 'Spirited Away',
-        year: '2001',
-        genre: 'Fantasy',
-        director: 'Hayao Miyazaki'
-    },
-    {
-        title: 'Whiplash',
-        year: '2014',
-        genre: 'Music',
-        director: 'Damien Chazelle'
-    },
-    {
-        title: 'Spider-Man: Across the Spider-Verse',
-        year: '2023',
-        genre: 'Action',
-        director: 'Joaquim Dos Santos'
-    },
-    {
-        title: 'Dune',
-        year: '2021',
-        genre: 'Action',
-        director: 'Christopher Nolan'
-    },
-    {
-        title: 'Dune: Part Two',
-        year: '2024',
-        genre: 'Action',
-        director: 'Christopher Nolan'
-    }
-];
-
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 app.use(morgan('common'));
 app.use(express.static('public'));
 
@@ -75,52 +20,170 @@ app.get('/', (req, res) => {
 });
 
 // 1 Return a list of ALL movies to the user
-app.get('/movies', (req, res) => {
-    res.json(movies);
-    // res.send('Sucessful GET request returning data on top movies.');
+app.get('/movies', async (req, res) => {
+    await Movies.find()
+        .then((movies) => {
+            res.status(201).json(movies);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
 });
 
-// 2 Return data (description, genre, director, image URL, whether it’s featured or not) about a single movie by title to the user
-app.get('/movies/:title', (req, res) => {
-    res.json(movies.find((movie) => 
-    {return movie.title === req.params.title}));
-    // res.send('Sucessful GET request returning data on single movie by title.');
+
+// 2 Return data about a single movie by title to the user
+app.get('/movies/:Title', async (req, res) => {
+    await Movies.findOne({Title: req.params.Title})
+    .then((movie) => {
+        res.json(movie);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+    });
 });
 
 // 3 Return data about a genre by name
-app.get('/genres/:name', (req, res) => {
-    res.send('Sucessful GET request returning data about a single genre by name.');
+app.get('/genres/:genreName', async (req, res) => {
+    await Movies.findOne({'Genre.Name': req.params.genreName})
+    .then((movie) => {
+        res.json(movie.Genre);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+    });
 });
 
 // 4 Return data about a director by name
-app.get('/directors/:name', (req, res) => {
-    res.send('Sucessful GET request returning data on single directorby name.');
+app.get('/directors/:directorName', async (req, res) => {
+    await Movies.findOne({'Director.Name': req.params.directorName})
+    .then((movie) => {
+        res.json(movie.Director);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+    });
 });
 
 // 5 Allow new users to register
-app.post('/users', (req, res) => {
-    res.send('Sucessful POST request allowing new user to register.');
+app.post('/users', async (req, res) => {
+  await Users.findOne({Username: req.body.Username})
+    .then((user) => {
+      if (user) {
+        return res.status(400).send(req.body.Username + 'already exists');
+      } else {
+        Users
+          .create({
+            Username: req.body.Username,
+            Password: req.body.Password,
+            Email: req.body.Email,
+            Birthday: req.body.Birthday
+          })
+          .then((user) =>{res.status(201).json(user) })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send('Error: ' + error);
+        })
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
+});
+
+// 5.1 Get all users
+app.get('/users', async (req, res) => {
+    await Users.find()
+        .then((users) => {
+            res.status(201).json(users);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
+
+// 5.2 Get a user by username
+app.get('/users/:Username', async (req, res) => {
+    await Users.findOne({Username: req.params.Username})
+    .then((user) => {
+        res.json(user);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+    });
 });
 
 // 6 Allow users to update their username
-app.put('/users/:username', (req, res) => {
-    res.send('Sucessful PUT request allowing user to update their username');
+app.put('/users/:Username', async (req, res) => {
+    await Users.findOneAndUpdate({Username: req.params.Username}, {$set:
+        {
+            Username: req.body.Username,
+            Password: req.body.Password,
+            Email: req.body.Email,
+            Birthday: req.body.Birthday
+        }
+    },
+    {new: true})
+    .then((updatedUser) => {
+        res.json(updatedUser);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+    })
 });
 
-// 7 Allow users to add a movie to their list of favorites (showing only a text that a movie has been added)
-app.post('/users/:username/favorites/:movie', (req, res) => {
-    res.send('Sucessful POST request allowing user to add movie to favorites.');
+// 7 Allow users to add a movie to their list of favorites
+app.post('/users/:Username/movies/:MovieID', async (req, res) => {
+    await Users.findOneAndUpdate({Username: req.params.Username}, {
+        $push: {Favorites: req.params.MovieID}
+    },
+    {new: true})
+    .then((updatedUser) => {
+        res.json(updatedUser);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+    });
 });
 
-// 8 Allow users to remove a movie from their list of favorites (showing only a text that a movie has been removed)
-app.delete('/users/:username/favorites/:movie', (req, res) => {
-    res.send('Sucessful DELETE request allowing user to remove movie from favorites.');
+// 8 Allow users to remove a movie from their list of favorites
+app.delete('/users/:Username/movies/:MovieID', async (req, res) => {
+    await Users.findOneAndUpdate({Username: req.params.Username}, {
+        $pull: {Favorites: req.params.MovieID}
+    },
+    {new: true})
+    .then((updatedUser) => {
+        res.json(updatedUser);
+    })
+    .catch((err) => {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+    });
 });
 
-// 9 Allow existing users to deregister (showing only a text that a user email has been removed)
-app.delete('/users/:username', (req, res) => {
-    res.send('Sucessful DELETE request allowing user to deregister.')
-})
+// 9 Allow existing users to deregister
+app.delete('/users/:Username', async (req, res) => {
+    await Users.findOneAndDelete({Username: req.params.Username})
+        .then((user) => {
+            if(!user) {
+                res.status(400).send(req.params.Username + ' was not found');
+            } else {
+                res.status(200).send(req.params.Username + ' was deleted.');
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('Error: ' + err);
+        });
+});
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
