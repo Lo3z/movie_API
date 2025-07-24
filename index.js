@@ -9,7 +9,7 @@ const Users = Models.User;
 mongoose.connect(process.env.CONNECTION_URI, {useNewURLParser: true, useUnifiedTopology: true}); 
 
 const cors = require('cors');
-let allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+let allowedOrigins = ['http://localhost:8080', 'https://git.heroku.com/moviefy.git'];
 app.use(cors({
     origin: (origin, callback) => {
         if(!origin) return callback(null, true);
