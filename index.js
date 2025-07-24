@@ -11,7 +11,7 @@ const Users = Models.User;
 const app = express();
 
 // mongoose.connect('mongodb://127.0.0.1:27017/myFlixDB');
-mongoose.connect( process.env.CONNECTION_URI, {useNewUrlParser: true, useUnifiedTopology: true }); 
+mongoose.connect(process.env.CONNECTION_URI, {useNewUrlParser: true, useUnifiedTopology: true}); 
 
 app.use(cors());
 
@@ -111,7 +111,7 @@ app.post('/users',
                 Users
                     .create({
                         Username: req.body.Username,
-                        Password: req.body.Password,
+                        Password: hashedPassword,
                         Email: req.body.Email,
                         Birthday: req.body.Birthday
                     })
@@ -153,14 +153,25 @@ app.get('/users/:Username', passport.authenticate('jwt', {session:false}), async
 });
 
 // 6 Allow users to update their username
-app.put('/users/:Username', passport.authenticate('jwt', {session: false}), async (req, res) => {
+app.put('/users/:Username',
+    [
+        check('Username', 'Username is required').isLength({min: 5}),
+        check('Username', 'Username contains non alphanumberic characters - not allowed.').isAlphanumeric(),
+        check('Password', 'Password is required').not().isEmpty(),
+        check('Email', 'Email does not appear to be valid').isEmail()
+    ], passport.authenticate('jwt', {session: false}), async (req, res) => {
+        let errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(422).json({errors: errors.array()});
+        }
+        let hashedPassword = Users.hashPassword(req.body.Password);
     if(req.user.Username !== req.params.Username){
         return res.status(400).send('Permission denied');
     }
     await Users.findOneAndUpdate({Username: req.params.Username}, {$set:
         {
             Username: req.body.Username,
-            Password: req.body.Password,
+            Password: hashedPassword,
             Email: req.body.Email,
             Birthday: req.body.Birthday
         }
