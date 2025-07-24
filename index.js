@@ -8,8 +8,10 @@ const Users = Models.User;
 // mongoose.connect('mongodb://127.0.0.1:27017/myFlixDB');
 mongoose.connect(process.env.CONNECTION_URI, {useNewURLParser: true, useUnifiedTopology: true}); 
 
+const app = express();
 const cors = require('cors');
 app.use(cors());
+
 // let allowedOrigins = ['http://localhost:8080', 'https://testsite.com'];
 // app.use(cors({
 //     origin: (origin, callback) => {
@@ -24,7 +26,6 @@ app.use(cors());
 
 const express = require("express");
 const morgan = require('morgan');
-const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
