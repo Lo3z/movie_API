@@ -1,15 +1,18 @@
+const express = require("express");
 const mongoose = require('mongoose');
 const Models = require('./models.js');
 const {check, validationResult} = require('express-validator');
+const morgan = require('morgan');
+const cors = require('cors');
 
 const Movies = Models.Movie;
 const Users = Models.User;
 
-// mongoose.connect('mongodb://127.0.0.1:27017/myFlixDB');
-mongoose.connect(process.env.CONNECTION_URI, {useNewURLParser: true, useUnifiedTopology: true}); 
-
 const app = express();
-const cors = require('cors');
+
+// mongoose.connect('mongodb://127.0.0.1:27017/myFlixDB');
+mongoose.connect(process.env.CONNECTION_URI, {useNewUrlParser: true, useUnifiedTopology: true}); 
+
 app.use(cors());
 
 // let allowedOrigins = ['http://localhost:8080', 'https://testsite.com'];
@@ -23,9 +26,6 @@ app.use(cors());
 //         return callback(null, true);
 //     }
 // }));
-
-const express = require("express");
-const morgan = require('morgan');
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
