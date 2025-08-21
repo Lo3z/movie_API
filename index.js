@@ -41,6 +41,8 @@ app.get('/', (req, res) => {
     res.send('Welcome to my app!');
 });
 
+// Login endpoint in auth.js
+
 // 1 Return a list of ALL movies to the user
 app.get('/movies', passport.authenticate('jwt', {session:false}), async (req, res) => {
     await Movies.find()
